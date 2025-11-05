@@ -1,5 +1,5 @@
-export const broadcast_event = (event_name: string, data: any) => {
-    return new CustomEvent(event_name, {
+export const broadcast_event = <T>(event_name: string, data: T) => {
+    return new CustomEvent<T>(event_name, {
         detail: data
     })
 }
