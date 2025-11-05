@@ -1,5 +1,9 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -117,11 +121,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
-
 
 body {
   margin: 0px;
@@ -133,6 +137,7 @@ body {
   -webkit-app-region: drag;
 }
 
-.app-dragger div, .app-dragger svg {
+.app-dragger div {
   -webkit-app-region: none !important;
+
 }
