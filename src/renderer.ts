@@ -27,9 +27,9 @@
  */
 
 import './index.css';
-import './App'
 
+import "./App"
 
-console.log(
-  '👋 This message is being logged by "renderer.js", included via webpack',
-);
+localStorage.getItem('dark_mode') != null && document.documentElement.classList.add(localStorage.getItem('dark_mode'))
+
+console.log('👋 This message is being logged by "renderer.js", included via webpack');

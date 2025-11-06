@@ -55,6 +55,7 @@
     "@editorjs/quote": "^2.7.6",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "class-variance-authority": "^0.7.1",

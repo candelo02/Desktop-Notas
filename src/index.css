@@ -141,3 +141,7 @@ body {
   -webkit-app-region: none !important;
 
 }
+
+.app-dragger div, .app-dragger svg {
+  -webkit-app-region: none !important;
+}

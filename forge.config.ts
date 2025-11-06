@@ -28,6 +28,17 @@ const config: ForgeConfig = {
       mainConfig,
       renderer: {
         config: rendererConfig,
+        // ⬇️ Ajustes de devServer para evitar el overlay y refrescos dobles
+        devServer: {
+          hot: true,
+          liveReload: false,
+          client: {
+            overlay: false,   // ⬅️ desactiva el overlay de errores
+            logging: 'info',
+            progress: false,
+            reconnect: true,
+          },
+        },
         entryPoints: [
           {
             html: './src/index.html',
@@ -40,8 +51,6 @@ const config: ForgeConfig = {
         ],
       },
     }),
-    // Fuses are used to enable/disable various Electron functionality
-    // at package time, before code signing the application
     new FusesPlugin({
       version: FuseVersion.V1,
       [FuseV1Options.RunAsNode]: false,

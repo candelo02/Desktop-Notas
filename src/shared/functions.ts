@@ -1,50 +1,52 @@
-import type { INoteData, TNote } from "@/shared/types";
+import { INoteData, TNote } from "./types";
 
 export const userFriendlyTime = (t_stamp: number) => {
     const aWeekTS = 1000 * 60 * 60 * 24 * 7;
-    const aDayTS = 1000 * 60 * 60 * 24;
-    const aWeekAgo = Date.now() - aWeekTS;
-    const aDayAgo = Date.now() - aDayTS;
-
-    // getDay(): 0=Dom, 1=Lun, ..., 6=Sáb
+    const aDayAgoTS = 1000 * 60 * 60 * 24;
+    const aweekAgo = new Date(Date.now() - aWeekTS).getTime();
+    const aDayAgo = new Date(Date.now() - aDayAgoTS).getTime();
     const week_day_to_str = [
-        'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
+        'Lunes',
+        'Martes',
+        'Miercoles',
+        'Jueves',
+        'Viernes',
+        'Sabado',
+        'Domingo'
     ];
-
-    if (t_stamp > aWeekAgo) {
+    if (t_stamp > aweekAgo) {
         if (t_stamp < aDayAgo) {
-            return week_day_to_str[new Date(t_stamp).getDay()];
+            return week_day_to_str[new Date(t_stamp).getDay()-1];
         }
-        return new Date(t_stamp).toTimeString().slice(0, 5);
+        return new Date(t_stamp).toTimeString().slice(0,5);
+    }
+    return new Date(t_stamp).toLocaleDateString();
+}
+
+export const sectionize_notes = (notes: INoteData[]) => {
+    const parsed_notes = notes.map(note => {note.note = typeof note.note == 'string' ? JSON.parse(note.note as string) : note.note; return note})
+    const aDayAgoTS = 1000 * 60 * 60 * 24;
+    const twoDayAgoTS = 1000 * 60 * 60 * 48;
+    const aDayAgo = new Date(Date.now() - aDayAgoTS).getTime();
+    const twoDayAgo = new Date(Date.now() - twoDayAgoTS).getTime();
+
+    const todays_notes = parsed_notes.filter(note => (note.note as TNote).time > aDayAgo || Object.keys((note.note as TNote)).length == 0)
+    const yesterdays_notes = parsed_notes.filter(note => (note.note as TNote).time < aDayAgo && (note.note as TNote).time > twoDayAgo)
+    const previous_notes = parsed_notes.filter(note => (note.note as TNote).time < twoDayAgo)
+    const sections = {} as any
+
+    if (todays_notes.length > 0) {
+        sections['Hoy'] = todays_notes
     }
 
-    return new Date(t_stamp).toLocaleDateString();
-};
+    console.log("sections", sections);
+    
+    if (yesterdays_notes.length > 0) {
+        sections['Ayer'] = yesterdays_notes
+    }
+    if (previous_notes.length > 0) {
+        sections['previous'] = previous_notes
+    }
 
-export const sectionze_notes = (notes: INoteData[]) => {
-    // NO mutar: crear copias con note parseado seguro
-    const parsed_notes: INoteData[] = notes.map((n) => {
-        let parsed: TNote | null = null;
-
-        if (typeof n.note === 'string') {
-            try { parsed = JSON.parse(n.note) as TNote; } catch { parsed = null; }
-        } else {
-            parsed = n.note as TNote;
-        }
-
-        const safe: TNote = parsed && Array.isArray(parsed.blocks)
-            ? parsed
-            : { time: Date.now(), blocks: [], version: '2.28.2' };
-
-        return { ...n, note: safe };
-    });
-
-    const aDayAgo = Date.now() - (1000 * 60 * 60 * 24);
-    const twoDaysAgo = Date.now() - (1000 * 60 * 60 * 48);
-
-    const todays_notes = parsed_notes.filter(n => (n.note as TNote).time > aDayAgo);
-    const yesterday_notes = parsed_notes.filter(n => (n.note as TNote).time <= aDayAgo && (n.note as TNote).time > twoDaysAgo);
-    const previous_notes = parsed_notes.filter(n => (n.note as TNote).time <= twoDaysAgo);
-
-    return { today: todays_notes, yesterday: yesterday_notes, previous: previous_notes };
-};
+    return sections
+}

@@ -2,28 +2,43 @@ import { contextBridge, ipcRenderer } from 'electron';
 import type { INoteData } from './shared/types';
 import { broadcast_event } from './shared/events';
 
+function emitAllNotes(notes: INoteData[]) {
+  window.dispatchEvent(broadcast_event('all-notes-data', notes));
+}
 
-ipcRenderer.on('onstart-notes-data', (ev, data) => {
-  document.onreadystatechange = (ev) => {
-    console.log("event onreadystatechange", ev);
-    setTimeout(() => {
-      window.dispatchEvent(broadcast_event('all-notes-data', data));
-    }, 0);
-  };
+ipcRenderer.on('onstart-notes-data', (_ev, data: INoteData[]) => {
+  const fire = () => setTimeout(() => emitAllNotes(data), 0);
+  if (document.readyState === 'interactive' || document.readyState === 'complete') fire();
+  else window.addEventListener('DOMContentLoaded', fire, { once: true });
 });
 
+ipcRenderer.on('update-notes-data', (_ev, data: INoteData[]) => {
+  emitAllNotes(data);
+});
 
 const renderer = {
   closeApp: () => ipcRenderer.send('close-app'),
   maximizeApp: () => ipcRenderer.send('maximize-app'),
   minimizeApp: () => ipcRenderer.send('minimize-app'),
 
-  set_note: async (data: INoteData, explicit = false): Promise<INoteData[]> => {
-    const notes = await ipcRenderer.invoke('set-note', data);
-    if (explicit) {
-      window.dispatchEvent(broadcast_event('all-notes-data', notes));
-    }
+
+  async set_note(data: INoteData, explicit = true): Promise<INoteData[]> {
+    const notes = (await ipcRenderer.invoke('set-note', data)) as INoteData[];
+    if (explicit) emitAllNotes(notes);
     return notes;
+  },
+
+
+  async delete_note(id: number, explicit = true): Promise<INoteData[]> {
+    const notes = (await ipcRenderer.invoke('delete-note', id)) as INoteData[];
+    if (explicit) emitAllNotes(notes);
+    return notes;
+  },
+
+
+  async fetch_all_notes(): Promise<void> {
+    const all_notes = (await ipcRenderer.invoke('fetch-all-notes')) as INoteData[];
+    emitAllNotes(all_notes);
   },
 };
 
